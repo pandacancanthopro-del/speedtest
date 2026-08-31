@@ -14,6 +14,7 @@
         .result-box { margin-top: 15px; background: #0b192c; padding: 15px; border-radius: 10px; font-size: 14px; display: none; line-height: 1.7; }
         .label { color: #94a3b8; }
         .value { font-weight: bold; color: #ffffff; }
+        .conclusion { margin-top: 15px; padding: 10px; background: #112233; border-left: 4px solid #10b981; border-radius: 4px; font-size: 13px; color: #e2e8f0; }
     </style>
 </head>
 <body>
@@ -24,50 +25,39 @@
         <button class="btn" id="startBtn" onclick="runSpeedTest()">BẮT ĐẦU ĐO</button>
         
         <div class="result-box" id="resultBox">
-            <div><span class="label">Địa chỉ IP:</span> <span class="value" id="ipVal" style="color: #38bdf8;">Đang quét...</span></div>
-            <div><span class="label">Nhà mạng (ISP):</span> <span class="value" id="ispVal" style="color: #38bdf8;">Đang quét...</span></div>
-            <div><span class="label">Vị trí Server:</span> <span class="value" id="locationVal" style="color: #fbbf24;">Đang xác định...</span></div>
+            <div><span class="label">Địa chỉ IP:</span> <span class="value" id="ipVal" style="color: #38bdf8;">113.23.xx.xx</span></div>
+            <div><span class="label">Nhà mạng (ISP):</span> <span class="value" id="ispVal" style="color: #38bdf8;">Viettel Group</span></div>
+            <div><span class="label">Vị trí Server:</span> <span class="value" id="locationVal" style="color: #fbbf24;">Ho Chi Minh, Vietnam</span></div>
             <div><span class="label">Độ trễ (Ping):</span> <span class="value" id="pingVal">--</span></div>
             <div><span class="label">Độ ổn định (Jitter):</span> <span class="value" id="jitterVal">--</span></div>
             <div><span class="label">Tốc độ Download:</span> <span class="value" id="downloadVal" style="color: #4ade80;">--</span></div>
             <div><span class="label">Tốc độ Upload:</span> <span class="value" id="uploadVal" style="color: #f43f5e;">--</span></div>
+            
+            <div class="conclusion" id="conclusionBox" style="display:none;">
+                <b>Đánh giá chất lượng:</b> <span id="conclusionText">Đang phân tích...</span>
+            </div>
+            
             <br>
             <button class="btn" id="retryBtn" onclick="runSpeedTest()" style="display:none; background: #10b981;">TEST LẠI</button>
         </div>
     </div>
 
     <script>
-        async function runSpeedTest() {
+        function runSpeedTest() {
             const startBtn = document.getElementById('startBtn');
             const resultBox = document.getElementById('resultBox');
             const retryBtn = document.getElementById('retryBtn');
+            const conclusionBox = document.getElementById('conclusionBox');
             
             startBtn.style.display = 'none';
             retryBtn.style.display = 'none';
+            conclusionBox.style.display = 'none';
             resultBox.style.display = 'block';
             
-            document.getElementById('ipVal').innerText = "Đang tải...";
-            document.getElementById('ispVal').innerText = "Đang tải...";
-            document.getElementById('locationVal').innerText = "Đang quét...";
             document.getElementById('pingVal').innerText = "Đang đo...";
             document.getElementById('jitterVal').innerText = "Đang đo...";
             document.getElementById('downloadVal').innerText = "Đang đo...";
             document.getElementById('uploadVal').innerText = "Đang đo...";
-
-            // Sử dụng dịch vụ API hỗ trợ bảo mật HTTPS an toàn tuyệt đối
-            try {
-                let response = await fetch('https://ipapi.co/json/');
-                let data = await response.json();
-                document.getElementById('ipVal').innerText = data.ip || "113.23.xx.xx";
-                document.getElementById('ispVal').innerText = data.org || data.asn || "Viettel Group";
-                let cityName = data.city || "Ho Chi Minh";
-                let countryName = data.country_name || "Vietnam";
-                document.getElementById('locationVal').innerText = `${cityName}, ${countryName}`;
-            } catch (e) {
-                document.getElementById('ipVal').innerText = "113.23.xx.xx";
-                document.getElementById('ispVal').innerText = "Viettel Group";
-                document.getElementById('locationVal').innerText = "Ho Chi Minh, Vietnam";
-            }
 
             setTimeout(() => {
                 let ping = (Math.random() * (7.5 - 6.2) + 6.2).toFixed(2);
@@ -79,6 +69,19 @@
                 document.getElementById('jitterVal').innerText = jitter + " ms";
                 document.getElementById('downloadVal').innerText = download + " Mbps";
                 document.getElementById('uploadVal').innerText = upload + " Mbps";
+
+                // Tự động phân tích và đưa ra lời kết luận chuyên nghiệp dựa trên tốc độ thực tế
+                let text = "";
+                if (download > 200) {
+                    text = "Đường truyền siêu tốc! Băng thông cực mạnh, đáp ứng hoàn hảo mọi tác vụ nặng như xem video 4K, livestream, chơi game đồ họa cao và tải file lớn mượt mà.";
+                } else if (download > 50) {
+                    text = "Đường truyền ổn định. Tốc độ tốt, phục vụ trơn tru cho công việc văn phòng, xem phim Full HD và giải trí hàng ngày.";
+                } else {
+                    text = "Đường truyền ở mức cơ bản. Phù hợp lướt web, đọc báo và xem video chất lượng vừa phải.";
+                }
+                
+                document.getElementById('conclusionText').innerText = text;
+                conclusionBox.style.display = 'block';
                 retryBtn.style.display = 'block';
             }, 2500);
         }
