@@ -15,6 +15,7 @@
         .label { color: #94a3b8; }
         .value { font-weight: bold; color: #ffffff; }
         .conclusion-card { margin-top: 15px; padding: 12px; background: #112233; border-radius: 8px; border-left: 5px solid #00b4d8; font-size: 13px; line-height: 1.5; }
+        .brand-footer { margin-top: 8px; text-align: right; font-size: 11px; color: #ff6500; font-weight: bold; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -36,6 +37,7 @@
             <div class="conclusion-card" id="conclusionCard" style="display:none;">
                 <div style="font-weight: bold; margin-bottom: 4px; color: #38bdf8;">ĐÁNH GIÁ CHUYÊN GIA:</div>
                 <div id="conclusionText">Đang tổng hợp thông số...</div>
+                <div class="brand-footer">Công Cụ By TRẦN TRINH OFFICIAL</div>
             </div>
             
             <br>
@@ -71,7 +73,6 @@
                 document.getElementById('downloadVal').innerText = download + " Mbps";
                 document.getElementById('uploadVal').innerText = upload + " Mbps";
 
-                // Xây dựng đoạn kết luận thông minh dựa trên thông số thực tế so với tiêu chuẩn
                 let evaluation = "";
                 if (download >= 100 && ping < 15) {
                     evaluation = "🔥 <span style='color: #4ade80; font-weight: bold;'>Mạng của bạn hoàn toàn ổn định và vượt tiêu chuẩn cao!</span> Tốc độ download siêu tốc cùng độ trễ cực thấp, đáp ứng hoàn hảo mọi tác vụ nặng như chơi game quốc tế, livestream 4K và truyền tải dữ liệu lớn.";
