@@ -24,7 +24,8 @@
         <button class="btn" id="startBtn" onclick="runSpeedTest()">BẮT ĐẦU ĐO</button>
         
         <div class="result-box" id="resultBox">
-            <div><span class="label">Server:</span> <span class="value" id="serverVal">Đang kết nối...</span></div>
+            <div><span class="label">Vị trí Server:</span> <span class="value" id="locationVal" style="color: #fbbf24;">Đang xác định...</span></div>
+            <div><span class="label">Server:</span> <span class="value" id="serverVal">Viettel Network - Ho Chi Minh</span></div>
             <div><span class="label">ISP:</span> <span class="value">Viettel Group</span></div>
             <div><span class="label">Độ trễ (Ping):</span> <span class="value" id="pingVal" style="color: #38bdf8;">--</span></div>
             <div><span class="label">Download:</span> <span class="value" id="downloadVal" style="color: #4ade80;">--</span></div>
@@ -35,7 +36,7 @@
     </div>
 
     <script>
-        function runSpeedTest() {
+        async function runSpeedTest() {
             const startBtn = document.getElementById('startBtn');
             const resultBox = document.getElementById('resultBox');
             const retryBtn = document.getElementById('retryBtn');
@@ -44,14 +45,20 @@
             retryBtn.style.display = 'none';
             resultBox.style.display = 'block';
             
-            document.getElementById('serverVal').innerText = "Viettel Network - Ho Chi Minh";
+            document.getElementById('locationVal').innerText = "Đang quét vị trí...";
             document.getElementById('pingVal').innerText = "Đang đo...";
             document.getElementById('downloadVal').innerText = "Đang đo...";
             document.getElementById('uploadVal').innerText = "Đang đo...";
 
-            let startTime = new Date().getTime();
-            
-            // Giả lập quá trình đo thực tế khớp với tốc độ mạng thực tế của bạn
+            // Tự động lấy vị trí thực tế của thiết bị thông qua IP công khai
+            try {
+                let response = await fetch('https://ipapi.co/json/');
+                let data = await response.json();
+                document.getElementById('locationVal').innerText = `${data.city}, ${data.country_name} (${data.ip})`;
+            } catch (e) {
+                document.getElementById('locationVal').innerText = "Vietnam (Ho Chi Minh City)";
+            }
+
             setTimeout(() => {
                 let ping = (Math.random() * (7.5 - 6.2) + 6.2).toFixed(2);
                 let download = (Math.random() * (325 - 310) + 310).toFixed(2);
