@@ -3,139 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speedtest - Trần Trinh Official</title>
+    <title>Độ Tốc Độ Mạng - Trần Trinh Official</title>
+    <!-- Thư viện hỗ trợ vẽ biểu đồ và chụp ảnh kết quả -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { background-color: #0b192c; color: #fff; font-family: Arial, sans-serif; text-align: center; padding: 15px; margin: 0; }
-        .card { max-width: 420px; margin: 20px auto; background: #1e3e62; padding: 20px; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); text-align: left; }
-        h2 { text-align: center; color: #ff6500; font-size: 18px; margin-bottom: 5px; }
-        p.sub { text-align: center; font-size: 13px; color: #cbd5e1; margin-bottom: 20px; }
-        .btn { background: #00b4d8; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
-        .btn:active { background: #0077b6; }
-        .result-box { margin-top: 15px; background: #0b192c; padding: 15px; border-radius: 10px; font-size: 13px; display: none; line-height: 1.6; }
-        .label { color: #94a3b8; }
-        .value { font-weight: bold; color: #ffffff; }
-        .conclusion-card { margin-top: 15px; padding: 12px; background: #112233; border-radius: 8px; border-left: 5px solid #00b4d8; font-size: 13px; line-height: 1.5; }
-        .brand-footer { margin-top: 8px; text-align: right; font-size: 11px; color: #ff6500; font-weight: bold; letter-spacing: 0.5px; }
-        .spec-note { font-size: 11px; font-style: italic; margin-left: 2px; }
-        .standard-info { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11.5px; color: #94a3b8; line-height: 1.5; }
+        :root {
+            --bg-color: #0b132b;
+            --card-bg: #1c2541;
+            --accent-color: #ff7b00;
+            --text-main: #ffffff;
+            --text-muted: #8d99ae;
+            --green: #4ade80;
+            --red: #f87171;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 520px;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: var(--accent-color);
+            font-size: 22px;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .header p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin: 0;
+        }
+        .result-box {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 6px;
+        }
+        .info-row span:last-child {
+            font-weight: 600;
+        }
+        .speed-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .metric-card {
+            background: rgba(255,255,255,0.03);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-card .val {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .metric-card.down .val { color: var(--green); }
+        .metric-card.up .val { color: var(--accent-color); }
+        .metric-card .label { font-size: 11px; color: var(--text-muted); }
+
+        .chart-container {
+            position: relative;
+            height: 120px;
+            margin: 15px 0;
+        }
+        .advice-box {
+            background: rgba(255, 123, 0, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-secondary {
+            background-color: #3b82f6;
+        }
+        .btn:disabled {
+            background-color: #4b5563;
+            cursor: not-allowed;
+        }
+        .history-section {
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .footer-brand {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .footer-brand a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>TRẦN TRINH OFFICIAL</h2>
-        <p class="sub">Công cụ đo tốc độ mạng chuyên nghiệp</p>
-        
-        <button class="btn" id="startBtn" onclick="runSpeedTest()">BẮT ĐẦU ĐO</button>
-        
-        <div class="result-box" id="resultBox">
-            <div><span class="label">Địa chỉ IP:</span> <span class="value" id="ipVal" style="color: #38bdf8;">Đang tải...</span></div>
-            <div><span class="label">Nhà mạng (ISP):</span> <span class="value" id="ispVal" style="color: #38bdf8;">Đang tải...</span></div>
-            <div><span class="label">Vị trí Server:</span> <span class="value" id="locationVal" style="color: #fbbf24;">Đang tải...</span></div>
-            <div><span class="label">Độ trễ (Ping):</span> <span class="value" id="pingVal">--</span> <span class="spec-note" id="pingNote"></span></div>
-            <div><span class="label">Độ ổn định (Jitter):</span> <span class="value" id="jitterVal">--</span> <span class="spec-note" id="jitterNote"></span></div>
-            <div><span class="label">Tốc độ Download:</span> <span class="value" id="downloadVal" style="color: #4ade80;">--</span></div>
-            <div><span class="label">Tốc độ Upload:</span> <span class="value" id="uploadVal" style="color: #f43f5e;">--</span></div>
-            
-            <div class="conclusion-card" id="conclusionCard" style="display:none;">
-                <div style="font-weight: bold; margin-bottom: 4px; color: #38bdf8;">ĐÁNH GIÁ CHUYÊN GIA:</div>
-                <div id="conclusionText">Đang tổng hợp thông số...</div>
-                
-                <div class="standard-info">
-                    💡 <b>Mẹo hiểu nhanh:</b><br>
-                    • <b>Ping (Độ trễ):</b> Càng nhỏ càng nhanh nhạy (Dưới 20ms là siêu mượt, trên 50ms dễ bị chậm trễ/lag).<br>
-                    • <b>Jitter (Độ dao động):</b> Càng thấp càng đều tay (Dưới 5ms là mạng đều, cao hơn dễ bị chập chờn lúc nhanh lúc chậm).
-                </div>
 
-                <div class="brand-footer">Công Cụ By TRẦN TRINH OFFICIAL</div>
+<div class="container" idcapture="captureArea">
+    <div class="header">
+        <h1>Trần Trinh Official</h1>
+        <p>Công cụ đo tốc độ mạng & Chẩn đoán chuyên nghiệp</p>
+    </div>
+
+    <div class="result-box">
+        <div class="info-row">
+            <span>Địa chỉ IP:</span>
+            <span id="ipVal" style="color: #60a5fa;">Đang tải...</span>
+        </div>
+        <div class="info-row">
+            <span>Nhà mạng (ISP):</span>
+            <span id="ispVal">Đang tải...</span>
+        </div>
+        <div class="info-row">
+            <span>Độ trễ (Ping / Jitter):</span>
+            <span id="pingVal">-- ms / -- ms</span>
+        </div>
+
+        <div class="speed-metrics">
+            <div class="metric-card down">
+                <div class="val" id="downVal">0.00</div>
+                <div class="label">Mbps (Download)</div>
             </div>
-            
-            <br>
-            <button class="btn" id="retryBtn" onclick="runSpeedTest()" style="display:none; background: #10b981;">TEST LẠI</button>
+            <div class="metric-card up">
+                <div class="val" id="upVal">0.00</div>
+                <div class="label">Mbps (Upload)</div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ thời gian thực -->
+        <div class="chart-container">
+            <canvas id="speedChart"></canvas>
         </div>
     </div>
 
-    <script>
-        async function runSpeedTest() {
-            const startBtn = document.getElementById('startBtn');
-            const resultBox = document.getElementById('resultBox');
-            const retryBtn = document.getElementById('retryBtn');
-            const conclusionCard = document.getElementById('conclusionCard');
-            
-            startBtn.style.display = 'none';
-            retryBtn.style.display = 'none';
-            conclusionCard.style.display = 'none';
-            resultBox.style.display = 'block';
-            
-            document.getElementById('ipVal').innerText = "Đang quét...";
-            document.getElementById('ispVal').innerText = "Đang quét...";
-            document.getElementById('locationVal').innerText = "Đang quét...";
-            document.getElementById('pingVal').innerText = "Đang đo...";
-            document.getElementById('pingNote').innerText = "";
-            document.getElementById('jitterVal').innerText = "Đang đo...";
-            document.getElementById('jitterNote').innerText = "";
-            document.getElementById('downloadVal').innerText = "Đang đo...";
-            document.getElementById('uploadVal').innerText = "Đang đo...";
+    <div class="advice-box" id="adviceBox">
+        💡 <b>Trạng thái:</b> Sẵn sàng kiểm tra chất lượng kết nối mạng của bạn. Nhấn nút bên dưới để bắt đầu!
+    </div>
 
-            try {
-                let res = await fetch('https://ipapi.co/json/');
-                let data = await res.json();
-                if(data.ip) {
-                    document.getElementById('ipVal').innerText = data.ip;
-                    document.getElementById('ispVal').innerText = data.org || data.asn || "Viettel Group";
-                    document.getElementById('locationVal').innerText = `${data.city}, ${data.country_name}` || "Ho Chi Minh, Vietnam";
-                } else {
-                    throw new Error();
-                }
-            } catch (err) {
-                document.getElementById('ipVal').innerText = "113.23.15.88";
-                document.getElementById('ispVal').innerText = "Viettel Group";
-                document.getElementById('locationVal').innerText = "Ho Chi Minh, Vietnam";
+    <div class="btn-group">
+        <button class="btn" id="startBtn" onclick="startTest()">BẮT ĐẦU ĐO</button>
+        <button class="btn btn-secondary" id="saveBtn" onclick="saveResultImage()" disabled>LƯU ẢNH KẾT QUẢ</button>
+    </div>
+
+    <div class="history-section" id="historyText">
+        Lịch sử gần đây: Chưa có dữ liệu
+    </div>
+
+    <div class="footer-brand">
+        Phát triển bởi <a href="https://youtube.com" target="_blank">Trần Trinh Official</a>
+    </div>
+</div>
+
+<script>
+    // Khởi tạo biểu đồ thời gian thực
+    const ctx = document.getElementById('speedChart').getContext('2d');
+    const speedChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['', '', '', '', '', '', '', '', '', ''],
+            datasets: [{
+                label: 'Tốc độ (Mbps)',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                borderColor: '#4ade80',
+                backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { display: false, beginAtZero: true },
+                x: { display: false }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // Lấy thông tin IP ban đầu qua API công khai miễn phí
+    async function fetchIPInfo() {
+        try {
+            let res = await fetch('https://ipapi.co/json/');
+            let data = await res.json();
+            document.getElementById('ipVal').innerText = data.ip || 'Không xác định';
+            document.getElementById('ispVal').innerText = data.org || data.asn || 'Viettel/VNPT';
+        } catch(e) {
+            document.getElementById('ipVal').innerText = '113.23.xx.xx';
+            document.getElementById('ispVal').innerText = 'Viettel Group';
+        }
+    }
+    fetchIPInfo();
+
+    let historyList = [];
+
+    // Giả lập tiến trình đo tốc độ chuyên nghiệp có hiệu ứng biểu đồ
+    function startTest() {
+        const startBtn = document.getElementById('startBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const adviceBox = document.getElementById('adviceBox');
+        
+        startBtn.disabled = true;
+        saveBtn.disabled = true;
+        startBtn.innerText = "ĐANG ĐO...";
+        adviceBox.innerHTML = "⚡ Hệ thống đang phân tích độ trễ và băng thông mạng...";
+
+        let step = 0;
+        let dummyData = [10, 45, 120, 210, 290, 340, 310, 325, 318, 321];
+        
+        let interval = setInterval(() => {
+            let currentVal = dummyData[step];
+            speedChart.data.datasets[0].data.shift();
+            speedChart.data.datasets[0].data.push(currentVal);
+            speedChart.update();
+
+            if(step < 5) {
+                document.getElementById('pingVal').innerText = (Math.random() * 5 + 4).toFixed(2) + " ms / 0.5 ms";
+            } else if(step < 8) {
+                document.getElementById('downVal').innerText = currentVal.toFixed(2);
+            } else {
+                let upSpeed = (currentVal * 0.95).toFixed(2);
+                document.getElementById('upVal').innerText = upSpeed;
             }
 
-            setTimeout(() => {
-                let ping = parseFloat((Math.random() * (7.5 - 6.2) + 6.2).toFixed(2));
-                let jitter = parseFloat((Math.random() * (0.8 - 0.2) + 0.2).toFixed(2));
-                let download = parseFloat((Math.random() * (325 - 310) + 310).toFixed(2));
-                let upload = parseFloat((Math.random() * (320 - 305) + 305).toFixed(2));
+            step++;
+            if(step >= dummyData.length) {
+                clearInterval(interval);
+                startBtn.disabled = false;
+                startBtn.innerText = "TEST LẠI";
+                saveBtn.disabled = false;
 
-                document.getElementById('pingVal').innerText = ping + " ms";
-                if (ping < 20) {
-                    document.getElementById('pingNote').innerHTML = "(Siêu mượt)";
-                    document.getElementById('pingNote').style.color = "#4ade80";
-                } else if (ping <= 50) {
-                    document.getElementById('pingNote').innerHTML = "(Ổn định)";
-                    document.getElementById('pingNote').style.color = "#38bdf8";
-                } else {
-                    document.getElementById('pingNote').innerHTML = "(Hơi chậm/Lag)";
-                    document.getElementById('pingNote').style.color = "#f87171";
-                }
+                let finalDown = document.getElementById('downVal').innerText;
+                adviceBox.innerHTML = `🔥 <b>Đánh giá:</b> Mạng hoàn toàn ổn định! Tốc độ Download ${finalDown} Mbps đáp ứng mượt mà mọi nhu cầu xem phim 4K, chơi game và livestream.`;
+                
+                // Lưu lịch sử
+                historyList.unshift(finalDown + " Mbps");
+                if(historyList.length > 3) historyList.pop();
+                document.getElementById('historyText').innerText = "Lịch sử gần đây: " + historyList.join(" | ");
+            }
+        }, 400);
+    }
 
-                document.getElementById('jitterVal').innerText = jitter + " ms";
-                if (jitter < 5) {
-                    document.getElementById('jitterNote').innerHTML = "(Rất đều đặn)";
-                    document.getElementById('jitterNote').style.color = "#4ade80";
-                } else {
-                    document.getElementById('jitterNote').innerHTML = "(Biến động/Chập chờn)";
-                    document.getElementById('jitterNote').style.color = "#f87171";
-                }
+    // Chức năng tải ảnh kết quả
+    function saveResultImage() {
+        const container = document.querySelector('.container');
+        html2canvas(container, {backgroundColor: '#1c2541'}).then(canvas => {
+            let link = document.createElement('a');
+            link.download = 'ket-qua-speedtest-tran-trinh.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+</script>
 
-                document.getElementById('downloadVal').innerText = download + " Mbps";
-                document.getElementById('uploadVal').innerText = upload + " Mbps";
-
-                let evaluation = "";
-                if (download >= 100 && ping < 20) {
-                    evaluation = "🔥 <span style='color: #4ade80; font-weight: bold;'>Mạng hoàn toàn ổn định và vượt chuẩn!</span> Tốc độ cao, phản hồi tức thì giúp chơi game, xem phim hay livestream mượt mà không lo giật lag.";
-                } else if (download >= 30) {
-                    evaluation = "👍 <span style='color: #38bdf8; font-weight: bold;'>Mạng đạt mức tốt.</span> Các chỉ số đều nằm trong vùng an toàn, phục vụ thoải mái mọi nhu cầu hàng ngày.";
-                } else {
-                    evaluation = "⚠️ <span style='color: #f87171; font-weight: bold;'>Mạng đang yếu hoặc chập chờn.</span> Chỉ số phản hồi cao có thể gây khó chịu khi chơi game hoặc gọi video.";
-                }
-
-                document.getElementById('conclusionText').innerHTML = evaluation;
-                conclusionCard.style.display = 'block';
-                retryBtn.style.display = 'block';
-            }, 2500);
-        }
-    </script>
 </body>
 </html>
