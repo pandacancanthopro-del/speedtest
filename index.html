@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speedtest - Trần Trinh Official</title>
+    <!-- Thư viện hỗ trợ chụp ảnh màn hình -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { background-color: #0b192c; color: #fff; font-family: Arial, sans-serif; text-align: center; padding: 15px; margin: 0; }
         .card { max-width: 420px; margin: 20px auto; background: #1e3e62; padding: 20px; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); text-align: left; }
         h2 { text-align: center; color: #ff6500; font-size: 18px; margin-bottom: 5px; }
         p.sub { text-align: center; font-size: 13px; color: #cbd5e1; margin-bottom: 20px; }
-        .btn { background: #00b4d8; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn { background: #00b4d8; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 8px; }
         .btn:active { background: #0077b6; }
+        .btn-capture { background: #f59e0b; }
+        .btn-capture:hover { background: #d97706; }
         .result-box { margin-top: 15px; background: #0b192c; padding: 15px; border-radius: 10px; font-size: 13px; display: none; line-height: 1.6; }
         .label { color: #94a3b8; }
         .value { font-weight: bold; color: #ffffff; }
@@ -18,10 +22,17 @@
         .brand-footer { margin-top: 8px; text-align: right; font-size: 11px; color: #ff6500; font-weight: bold; letter-spacing: 0.5px; }
         .spec-note { font-size: 11px; font-style: italic; margin-left: 2px; }
         .standard-info { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11.5px; color: #94a3b8; line-height: 1.5; }
+        
+        /* CSS Lịch sử đo */
+        .history-section { margin-top: 20px; background: #112233; padding: 12px; border-radius: 10px; font-size: 12px; }
+        .history-title { font-weight: bold; color: #38bdf8; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .history-list { max-height: 120px; overflow-y: auto; padding-right: 4px; }
+        .history-item { background: #0b192c; padding: 6px 10px; border-radius: 6px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #10b981; }
+        .clear-history { font-size: 10px; color: #f87171; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
-    <div class="card">
+    <div class="card" id="captureArea">
         <h2>TRẦN TRINH OFFICIAL</h2>
         <p class="sub">Công cụ đo tốc độ mạng chuyên nghiệp</p>
         
@@ -50,19 +61,33 @@
             </div>
             
             <br>
+            <button class="btn btn-capture" id="captureBtn" onclick="captureScreen()" style="display:none;">📸 CHỤP LẠI (LƯU ẢNH)</button>
             <button class="btn" id="retryBtn" onclick="runSpeedTest()" style="display:none; background: #10b981;">TEST LẠI</button>
+        </div>
+
+        <!-- Khung lịch sử -->
+        <div class="history-section" id="historySection" style="display:none;">
+            <div class="history-title">
+                <span>🕒 Lịch sử đo gần đây</span>
+                <span class="clear-history" onclick="clearHistory()">Xóa lịch sử</span>
+            </div>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", updateHistoryUI);
+
         async function runSpeedTest() {
             const startBtn = document.getElementById('startBtn');
             const resultBox = document.getElementById('resultBox');
             const retryBtn = document.getElementById('retryBtn');
+            const captureBtn = document.getElementById('captureBtn');
             const conclusionCard = document.getElementById('conclusionCard');
             
             startBtn.style.display = 'none';
             retryBtn.style.display = 'none';
+            captureBtn.style.display = 'none';
             conclusionCard.style.display = 'none';
             resultBox.style.display = 'block';
             
@@ -134,7 +159,70 @@
                 document.getElementById('conclusionText').innerHTML = evaluation;
                 conclusionCard.style.display = 'block';
                 retryBtn.style.display = 'block';
+                captureBtn.style.display = 'block';
+
+                // Lưu kết quả vào lịch sử localStorage
+                saveToHistory({
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    down: download,
+                    up: upload,
+                    ping: ping
+                });
             }, 2500);
+        }
+
+        // Hàm chụp màn hình kết quả lưu thành ảnh
+        function captureScreen() {
+            const captureBtn = document.getElementById('captureBtn');
+            const retryBtn = document.getElementById('retryBtn');
+            captureBtn.style.display = 'none';
+            retryBtn.style.display = 'none';
+
+            html2canvas(document.getElementById('captureArea'), { backgroundColor: '#0b192c' }).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'Speedtest_TranTrinhOfficial.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                captureBtn.style.display = 'block';
+                retryBtn.style.display = 'block';
+            });
+        }
+
+        function saveToHistory(record) {
+            let history = JSON.parse(localStorage.getItem('speedtest_history')) || [];
+            history.unshift(record);
+            if (history.length > 5) history.pop();
+            localStorage.setItem('speedtest_history', JSON.stringify(history));
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            let history = JSON.parse(localStorage.getItem('speedtest_history')) || [];
+            let historySection = document.getElementById('historySection');
+            let historyList = document.getElementById('historyList');
+
+            if (history.length > 0) {
+                historySection.style.display = 'block';
+                historyList.innerHTML = '';
+                history.forEach(item => {
+                    historyList.innerHTML += `
+                        <div class="history-item">
+                            <span>🕒 ${item.time}</span>
+                            <span style="color: #4ade80; font-weight: bold;">↓ ${item.down}</span>
+                            <span style="color: #f43f5e; font-weight: bold;">↑ ${item.up}</span>
+                            <span style="color: #38bdf8;">Ping: ${item.ping}ms</span>
+                        </div>
+                    `;
+                });
+            } else {
+                historySection.style.display = 'none';
+            }
+        }
+
+        function clearHistory() {
+            localStorage.removeItem('speedtest_history');
+            updateHistoryUI();
         }
     </script>
 </body>
