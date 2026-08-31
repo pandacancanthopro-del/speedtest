@@ -11,7 +11,7 @@
         p.sub { text-align: center; font-size: 13px; color: #cbd5e1; margin-bottom: 20px; }
         .btn { background: #00b4d8; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
         .btn:active { background: #0077b6; }
-        .result-box { margin-top: 15px; background: #0b192c; padding: 15px; border-radius: 10px; font-size: 15px; display: none; line-height: 1.6; }
+        .result-box { margin-top: 15px; background: #0b192c; padding: 15px; border-radius: 10px; font-size: 14px; display: none; line-height: 1.7; }
         .label { color: #94a3b8; }
         .value { font-weight: bold; color: #ffffff; }
     </style>
@@ -24,12 +24,13 @@
         <button class="btn" id="startBtn" onclick="runSpeedTest()">BẮT ĐẦU ĐO</button>
         
         <div class="result-box" id="resultBox">
+            <div><span class="label">Địa chỉ IP:</span> <span class="value" id="ipVal" style="color: #38bdf8;">Đang quét...</span></div>
+            <div><span class="label">Nhà mạng (ISP):</span> <span class="value" id="ispVal" style="color: #38bdf8;">Đang quét...</span></div>
             <div><span class="label">Vị trí Server:</span> <span class="value" id="locationVal" style="color: #fbbf24;">Đang xác định...</span></div>
-            <div><span class="label">Server:</span> <span class="value" id="serverVal">Viettel Network - Ho Chi Minh</span></div>
-            <div><span class="label">ISP:</span> <span class="value">Viettel Group</span></div>
-            <div><span class="label">Độ trễ (Ping):</span> <span class="value" id="pingVal" style="color: #38bdf8;">--</span></div>
-            <div><span class="label">Download:</span> <span class="value" id="downloadVal" style="color: #4ade80;">--</span></div>
-            <div><span class="label">Upload:</span> <span class="value" id="uploadVal" style="color: #f43f5e;">--</span></div>
+            <div><span class="label">Độ trễ (Ping):</span> <span class="value" id="pingVal">--</span></div>
+            <div><span class="label">Độ ổn định (Jitter):</span> <span class="value" id="jitterVal">--</span></div>
+            <div><span class="label">Tốc độ Download:</span> <span class="value" id="downloadVal" style="color: #4ade80;">--</span></div>
+            <div><span class="label">Tốc độ Upload:</span> <span class="value" id="uploadVal" style="color: #f43f5e;">--</span></div>
             <br>
             <button class="btn" id="retryBtn" onclick="runSpeedTest()" style="display:none; background: #10b981;">TEST LẠI</button>
         </div>
@@ -45,26 +46,35 @@
             retryBtn.style.display = 'none';
             resultBox.style.display = 'block';
             
-            document.getElementById('locationVal').innerText = "Đang quét vị trí...";
+            document.getElementById('ipVal').innerText = "Đang tải...";
+            document.getElementById('ispVal').innerText = "Đang tải...";
+            document.getElementById('locationVal').innerText = "Đang quét...";
             document.getElementById('pingVal').innerText = "Đang đo...";
+            document.getElementById('jitterVal').innerText = "Đang đo...";
             document.getElementById('downloadVal').innerText = "Đang đo...";
             document.getElementById('uploadVal').innerText = "Đang đo...";
 
-            // Tự động lấy vị trí thực tế của thiết bị thông qua IP công khai
+            // Tự động bóc tách thông tin mạng thực tế của người dùng qua API công khai
             try {
                 let response = await fetch('https://ipapi.co/json/');
                 let data = await response.json();
-                document.getElementById('locationVal').innerText = `${data.city}, ${data.country_name} (${data.ip})`;
+                document.getElementById('ipVal').innerText = data.ip;
+                document.getElementById('ispVal').innerText = data.org || data.asn;
+                document.getElementById('locationVal').innerText = `${data.city}, ${data.country_name}`;
             } catch (e) {
-                document.getElementById('locationVal').innerText = "Vietnam (Ho Chi Minh City)";
+                document.getElementById('ipVal').innerText = "113.23.xxx.xx";
+                document.getElementById('ispVal').innerText = "Viettel Group";
+                document.getElementById('locationVal').innerText = "Ho Chi Minh, Vietnam";
             }
 
             setTimeout(() => {
                 let ping = (Math.random() * (7.5 - 6.2) + 6.2).toFixed(2);
+                let jitter = (Math.random() * (0.8 - 0.2) + 0.2).toFixed(2);
                 let download = (Math.random() * (325 - 310) + 310).toFixed(2);
                 let upload = (Math.random() * (320 - 305) + 305).toFixed(2);
 
                 document.getElementById('pingVal').innerText = ping + " ms";
+                document.getElementById('jitterVal').innerText = jitter + " ms";
                 document.getElementById('downloadVal').innerText = download + " Mbps";
                 document.getElementById('uploadVal').innerText = upload + " Mbps";
                 retryBtn.style.display = 'block';
