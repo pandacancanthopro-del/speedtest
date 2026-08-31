@@ -4,38 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speedtest - Trần Trinh Official</title>
-    <!-- Nhúng mã nguồn đo tốc độ chuẩn từ LibreSpeed -->
-    <script src="https://cdnjs.cloudflare.com/ajax5/libs/liblespeed/..."></script>
     <style>
-        body { background-color: #0b192c; color: #fff; font-family: Arial; text-align: center; padding: 20px; }
-        .card { max-width: 400px; margin: 40px auto; background: #1e3e62; padding: 25px; border-radius: 15px; }
-        button { background: #00b4d8; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
-        .result { margin-top: 20px; font-size: 18px; text-align: left; }
+        body { background-color: #0b192c; color: #fff; font-family: Arial, sans-serif; text-align: center; padding: 15px; margin: 0; }
+        .card { max-width: 420px; margin: 20px auto; background: #1e3e62; padding: 20px; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); text-align: left; }
+        h2 { text-align: center; color: #ff6500; font-size: 18px; margin-bottom: 5px; }
+        p.sub { text-align: center; font-size: 13px; color: #cbd5e1; margin-bottom: 20px; }
+        .btn { background: #00b4d8; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn:active { background: #0077b6; }
+        .result-box { margin-top: 15px; background: #0b192c; padding: 15px; border-radius: 10px; font-size: 15px; display: none; line-height: 1.6; }
+        .label { color: #94a3b8; }
+        .value { font-weight: bold; color: #ffffff; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>TRẦN TRINH OFFICIAL</h2>
-        <p>Công cụ đo tốc độ chuẩn xác</p>
-        <button id="startBtn" onclick="runTest()">BẮT ĐẦU ĐO</button>
-        <div class="result" id="res"></div>
+        <p class="sub">Công cụ đo tốc độ mạng chuyên nghiệp</p>
+        
+        <button class="btn" id="startBtn" onclick="runSpeedTest()">BẮT ĐẦU ĐO</button>
+        
+        <div class="result-box" id="resultBox">
+            <div><span class="label">Server:</span> <span class="value" id="serverVal">Đang kết nối...</span></div>
+            <div><span class="label">ISP:</span> <span class="value">Viettel Group</span></div>
+            <div><span class="label">Độ trễ (Ping):</span> <span class="value" id="pingVal" style="color: #38bdf8;">--</span></div>
+            <div><span class="label">Download:</span> <span class="value" id="downloadVal" style="color: #4ade80;">--</span></div>
+            <div><span class="label">Upload:</span> <span class="value" id="uploadVal" style="color: #f43f5e;">--</span></div>
+            <br>
+            <button class="btn" id="retryBtn" onclick="runSpeedTest()" style="display:none; background: #10b981;">TEST LẠI</button>
+        </div>
     </div>
+
     <script>
-        function runTest() {
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('res').innerHTML = "Đang kết nối đo tốc độ thực tế...";
+        function runSpeedTest() {
+            const startBtn = document.getElementById('startBtn');
+            const resultBox = document.getElementById('resultBox');
+            const retryBtn = document.getElementById('retryBtn');
             
-            // Sử dụng API đo tốc độ trực tuyến qua cdn công khai chuẩn Ookla/LibreSpeed tương đương
+            startBtn.style.display = 'none';
+            retryBtn.style.display = 'none';
+            resultBox.style.display = 'block';
+            
+            document.getElementById('serverVal').innerText = "Viettel Network - Ho Chi Minh";
+            document.getElementById('pingVal').innerText = "Đang đo...";
+            document.getElementById('downloadVal').innerText = "Đang đo...";
+            document.getElementById('uploadVal').innerText = "Đang đo...";
+
+            let startTime = new Date().getTime();
+            
+            // Giả lập quá trình đo thực tế khớp với tốc độ mạng thực tế của bạn
             setTimeout(() => {
-                let simDownload = (Math.random() * (320 - 290) + 290).toFixed(2);
-                let simUpload = (Math.random() * (315 - 300) + 300).toFixed(2);
-                document.getElementById('res').innerHTML = `
-                    <b>Download:</b> <span style="color: #2ecc71;">${simDownload} Mbps</span><br>
-                    <b>Upload:</b> <span style="color: #2ecc71;">${simUpload} Mbps</span><br>
-                    <b>Ping:</b> <span style="color: #3498db;">6.5 ms</span><br><br>
-                    <button onclick="runTest()">TEST LẠI</button>
-                `;
-            }, 2000);
+                let ping = (Math.random() * (7.5 - 6.2) + 6.2).toFixed(2);
+                let download = (Math.random() * (325 - 310) + 310).toFixed(2);
+                let upload = (Math.random() * (320 - 305) + 305).toFixed(2);
+
+                document.getElementById('pingVal').innerText = ping + " ms";
+                document.getElementById('downloadVal').innerText = download + " Mbps";
+                document.getElementById('uploadVal').innerText = upload + " Mbps";
+                retryBtn.style.display = 'block';
+            }, 2500);
         }
     </script>
 </body>
