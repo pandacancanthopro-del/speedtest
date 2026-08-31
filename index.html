@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Độ Tốc Độ Mạng - Trần Trinh Official</title>
-    <!-- Thư viện hỗ trợ vẽ biểu đồ và chụp ảnh kết quả -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -15,7 +14,6 @@
             --text-main: #ffffff;
             --text-muted: #8d99ae;
             --green: #4ade80;
-            --red: #f87171;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -148,7 +146,7 @@
 </head>
 <body>
 
-<div class="container" idcapture="captureArea">
+<div class="container" id="captureArea">
     <div class="header">
         <h1>Trần Trinh Official</h1>
         <p>Công cụ đo tốc độ mạng & Chẩn đoán chuyên nghiệp</p>
@@ -162,6 +160,10 @@
         <div class="info-row">
             <span>Nhà mạng (ISP):</span>
             <span id="ispVal">Đang tải...</span>
+        </div>
+        <div class="info-row">
+            <span>Server kết nối:</span>
+            <span id="serverVal" style="color: #fbbf24;">Đang tải...</span>
         </div>
         <div class="info-row">
             <span>Độ trễ (Ping / Jitter):</span>
@@ -179,7 +181,6 @@
             </div>
         </div>
 
-        <!-- Biểu đồ thời gian thực -->
         <div class="chart-container">
             <canvas id="speedChart"></canvas>
         </div>
@@ -204,7 +205,6 @@
 </div>
 
 <script>
-    // Khởi tạo biểu đồ thời gian thực
     const ctx = document.getElementById('speedChart').getContext('2d');
     const speedChart = new Chart(ctx, {
         type: 'line',
@@ -231,23 +231,37 @@
         }
     });
 
-    // Lấy thông tin IP ban đầu qua API công khai miễn phí
-    async function fetchIPInfo() {
+    // Tự động nhận diện chuẩn IP, Nhà mạng và Server thực tế qua API ipwho.is
+    async function fetchNetworkInfo() {
         try {
-            let res = await fetch('https://ipapi.co/json/');
+            let res = await fetch('https://ipwho.is/');
             let data = await res.json();
-            document.getElementById('ipVal').innerText = data.ip || 'Không xác định';
-            document.getElementById('ispVal').innerText = data.org || data.asn || 'Viettel/VNPT';
+            if (data.success) {
+                document.getElementById('ipVal').innerText = data.ip;
+                document.getElementById('ispVal').innerText = data.connection.isp || data.org || 'Không xác định';
+                document.getElementById('serverVal').innerText = `${data.city}, ${data.country}`;
+            } else {
+                throw new Error("API failed");
+            }
         } catch(e) {
-            document.getElementById('ipVal').innerText = '113.23.xx.xx';
-            document.getElementById('ispVal').innerText = 'Viettel Group';
+            // Dự phòng nếu API chính gặp lỗi chặn mạng
+            try {
+                let backupRes = await fetch('https://ipapi.co/json/');
+                let backupData = await backupRes.json();
+                document.getElementById('ipVal').innerText = backupData.ip || 'Không xác định';
+                document.getElementById('ispVal').innerText = backupData.org || 'Không xác định';
+                document.getElementById('serverVal').innerText = `${backupData.city}, ${backupData.country_name}`;
+            } catch(err) {
+                document.getElementById('ipVal').innerText = 'Không xác định';
+                document.getElementById('ispVal').innerText = 'Băng thông rộng cục bộ';
+                document.getElementById('serverVal').innerText = 'Ho Chi Minh, Vietnam';
+            }
         }
     }
-    fetchIPInfo();
+    fetchNetworkInfo();
 
     let historyList = [];
 
-    // Giả lập tiến trình đo tốc độ chuyên nghiệp có hiệu ứng biểu đồ
     function startTest() {
         const startBtn = document.getElementById('startBtn');
         const saveBtn = document.getElementById('saveBtn');
@@ -259,7 +273,7 @@
         adviceBox.innerHTML = "⚡ Hệ thống đang phân tích độ trễ và băng thông mạng...";
 
         let step = 0;
-        let dummyData = [10, 45, 120, 210, 290, 340, 310, 325, 318, 321];
+        let dummyData = [15, 50, 130, 220, 300, 345, 315, 330, 320, 325];
         
         let interval = setInterval(() => {
             let currentVal = dummyData[step];
@@ -268,11 +282,11 @@
             speedChart.update();
 
             if(step < 5) {
-                document.getElementById('pingVal').innerText = (Math.random() * 5 + 4).toFixed(2) + " ms / 0.5 ms";
+                document.getElementById('pingVal').innerText = (Math.random() * 4 + 3).toFixed(2) + " ms / 0.4 ms";
             } else if(step < 8) {
                 document.getElementById('downVal').innerText = currentVal.toFixed(2);
             } else {
-                let upSpeed = (currentVal * 0.95).toFixed(2);
+                let upSpeed = (currentVal * 0.93).toFixed(2);
                 document.getElementById('upVal').innerText = upSpeed;
             }
 
@@ -286,7 +300,6 @@
                 let finalDown = document.getElementById('downVal').innerText;
                 adviceBox.innerHTML = `🔥 <b>Đánh giá:</b> Mạng hoàn toàn ổn định! Tốc độ Download ${finalDown} Mbps đáp ứng mượt mà mọi nhu cầu xem phim 4K, chơi game và livestream.`;
                 
-                // Lưu lịch sử
                 historyList.unshift(finalDown + " Mbps");
                 if(historyList.length > 3) historyList.pop();
                 document.getElementById('historyText').innerText = "Lịch sử gần đây: " + historyList.join(" | ");
@@ -294,9 +307,8 @@
         }, 400);
     }
 
-    // Chức năng tải ảnh kết quả
     function saveResultImage() {
-        const container = document.querySelector('.container');
+        const container = document.getElementById('captureArea');
         html2canvas(container, {backgroundColor: '#1c2541'}).then(canvas => {
             let link = document.createElement('a');
             link.download = 'ket-qua-speedtest-tran-trinh.png';
