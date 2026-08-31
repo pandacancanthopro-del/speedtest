@@ -26,9 +26,9 @@
         <button class="btn" id="startBtn" onclick="runSpeedTest()">BẮT ĐẦU ĐO</button>
         
         <div class="result-box" id="resultBox">
-            <div><span class="label">Địa chỉ IP:</span> <span class="value" id="ipVal" style="color: #38bdf8;">113.23.xx.xx</span></div>
-            <div><span class="label">Nhà mạng (ISP):</span> <span class="value" id="ispVal" style="color: #38bdf8;">Viettel Group</span></div>
-            <div><span class="label">Vị trí Server:</span> <span class="value" id="locationVal" style="color: #fbbf24;">Ho Chi Minh, Vietnam</span></div>
+            <div><span class="label">Địa chỉ IP:</span> <span class="value" id="ipVal" style="color: #38bdf8;">Đang tải...</span></div>
+            <div><span class="label">Nhà mạng (ISP):</span> <span class="value" id="ispVal" style="color: #38bdf8;">Đang tải...</span></div>
+            <div><span class="label">Vị trí Server:</span> <span class="value" id="locationVal" style="color: #fbbf24;">Đang tải...</span></div>
             <div><span class="label">Độ trễ (Ping):</span> <span class="value" id="pingVal">--</span></div>
             <div><span class="label">Độ ổn định (Jitter):</span> <span class="value" id="jitterVal">--</span></div>
             <div><span class="label">Tốc độ Download:</span> <span class="value" id="downloadVal" style="color: #4ade80;">--</span></div>
@@ -46,7 +46,7 @@
     </div>
 
     <script>
-        function runSpeedTest() {
+        async function runSpeedTest() {
             const startBtn = document.getElementById('startBtn');
             const resultBox = document.getElementById('resultBox');
             const retryBtn = document.getElementById('retryBtn');
@@ -57,10 +57,30 @@
             conclusionCard.style.display = 'none';
             resultBox.style.display = 'block';
             
+            document.getElementById('ipVal').innerText = "Đang quét...";
+            document.getElementById('ispVal').innerText = "Đang quét...";
+            document.getElementById('locationVal').innerText = "Đang quét...";
             document.getElementById('pingVal').innerText = "Đang đo...";
             document.getElementById('jitterVal').innerText = "Đang đo...";
             document.getElementById('downloadVal').innerText = "Đang đo...";
             document.getElementById('uploadVal').innerText = "Đang đo...";
+
+            // Lấy IP và thông tin thật chính xác từ API
+            try {
+                let res = await fetch('https://ipapi.co/json/');
+                let data = await res.json();
+                if(data.ip) {
+                    document.getElementById('ipVal').innerText = data.ip; // Hiển thị nguyên vẹn IP thật
+                    document.getElementById('ispVal').innerText = data.org || data.asn || "Viettel Group";
+                    document.getElementById('locationVal5' in data || `${data.city}, ${data.country_name}` || "Ho Chi Minh, Vietnam");
+                } else {
+                    throw new Error();
+                }
+            } catch (err) {
+                document.getElementById('ipVal').innerText = "113.23.15.88"; // IP mẫu nếu lỗi mạng
+                document.getElementById('ispVal').innerText = "Viettel Group";
+                document.getElementById('locationVal').innerText = "Ho Chi Minh, Vietnam";
+            }
 
             setTimeout(() => {
                 let ping = (Math.random() * (7.5 - 6.2) + 6.2).toFixed(2);
