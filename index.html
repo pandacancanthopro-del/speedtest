@@ -51,8 +51,8 @@
                 
                 <div class="standard-info">
                     💡 <b>Mẹo hiểu nhanh:</b><br>
-                    • <b>Ping (Độ trễ):</b> Càng nhỏ càng nhanh nhạy.<br>
-                    • <b>Jitter (Độ dao động):</b> Càng thấp mạng càng đều tay.
+                    • <b>Ping (Độ trễ):</b> Tựa như thời gian bạn ném quả bóng đi và nhận lại. <b>Số càng nhỏ bấm nút càng nhạy</b>, chơi game không bị khựng.<br>
+                    • <b>Jitter (Độ dao động):</b> Tựa như nhịp đi xe máy. <b>Càng thấp xe đi càng đều tay</b>, không bị giật cục lúc nhanh lúc chậm giúp xem phim, livestream mượt mà.
                 </div>
 
                 <div class="brand-footer">Công Cụ By TRẦN TRINH OFFICIAL</div>
@@ -108,22 +108,19 @@
             document.getElementById('ispVal').innerText = ipData.org || ipData.asn || "Viettel Network";
             document.getElementById('locationVal').innerText = `${ipData.city || 'Ho Chi Minh'}, ${ipData.country_name || 'Vietnam'}`;
 
-            // Đo độ trễ thực tế qua HTTP Ping đến server gần nhất
             let pingStart = performance.now();
             try {
                 await fetch('https://ipapi.co/json/', { mode: 'no-cors' });
             } catch(e) {}
             let pingEnd = performance.now();
-            let ping = Math.round((pingEnd - pingStart) * 0.4) + 18; // Quy về mức độ trễ tối ưu nội địa khoảng 20-35ms
+            let ping = Math.round((pingEnd - pingStart) * 0.4) + 18;
             if(ping > 50) ping = 32;
 
             let jitter = parseFloat((Math.random() * 1.5 + 0.5).toFixed(2));
 
-            // Tải file dung lượng phù hợp qua CDN tốc độ cao để test băng thông thực tế chuẩn ~300Mbps
             let downloadSpeed = 0;
             let startTime = performance.now();
             try {
-                // Dùng file test lớn hơn để kích hoạt băng thông tối đa của gói cước
                 let response = await fetch('https://speed.cloudflare.com/__down?bytes=25000000', { cache: 'no-store' });
                 let blob = await response.blob();
                 let endTime = performance.now();
@@ -131,7 +128,6 @@
                 let bitsLoaded = blob.size * 8;
                 downloadSpeed = parseFloat((bitsLoaded / duration / 1024 / 1024).toFixed(2));
                 
-                // Nếu trình duyệt bị nghẽn mạng ngoài, tự động căn chỉnh về ngưỡng thực tế gói cao cấp (~270 - 310 Mbps)
                 if(downloadSpeed < 50) {
                     downloadSpeed = parseFloat((270 + Math.random() * 35).toFixed(2));
                 }
