@@ -14,7 +14,7 @@
         .result-box { margin-top: 15px; background: #0b192c; padding: 15px; border-radius: 10px; font-size: 14px; display: none; line-height: 1.7; }
         .label { color: #94a3b8; }
         .value { font-weight: bold; color: #ffffff; }
-        .conclusion { margin-top: 15px; padding: 10px; background: #112233; border-left: 4px solid #10b981; border-radius: 4px; font-size: 13px; color: #e2e8f0; }
+        .conclusion-card { margin-top: 15px; padding: 12px; background: #112233; border-radius: 8px; border-left: 5px solid #00b4d8; font-size: 13px; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -33,8 +33,9 @@
             <div><span class="label">Tốc độ Download:</span> <span class="value" id="downloadVal" style="color: #4ade80;">--</span></div>
             <div><span class="label">Tốc độ Upload:</span> <span class="value" id="uploadVal" style="color: #f43f5e;">--</span></div>
             
-            <div class="conclusion" id="conclusionBox" style="display:none;">
-                <b>Đánh giá chất lượng:</b> <span id="conclusionText">Đang phân tích...</span>
+            <div class="conclusion-card" id="conclusionCard" style="display:none;">
+                <div style="font-weight: bold; margin-bottom: 4px; color: #38bdf8;">ĐÁNH GIÁ CHUYÊN GIA:</div>
+                <div id="conclusionText">Đang tổng hợp thông số...</div>
             </div>
             
             <br>
@@ -47,11 +48,11 @@
             const startBtn = document.getElementById('startBtn');
             const resultBox = document.getElementById('resultBox');
             const retryBtn = document.getElementById('retryBtn');
-            const conclusionBox = document.getElementById('conclusionBox');
+            const conclusionCard = document.getElementById('conclusionCard');
             
             startBtn.style.display = 'none';
             retryBtn.style.display = 'none';
-            conclusionBox.style.display = 'none';
+            conclusionCard.style.display = 'none';
             resultBox.style.display = 'block';
             
             document.getElementById('pingVal').innerText = "Đang đo...";
@@ -70,18 +71,18 @@
                 document.getElementById('downloadVal').innerText = download + " Mbps";
                 document.getElementById('uploadVal').innerText = upload + " Mbps";
 
-                // Tự động phân tích và đưa ra lời kết luận chuyên nghiệp dựa trên tốc độ thực tế
-                let text = "";
-                if (download > 200) {
-                    text = "Đường truyền siêu tốc! Băng thông cực mạnh, đáp ứng hoàn hảo mọi tác vụ nặng như xem video 4K, livestream, chơi game đồ họa cao và tải file lớn mượt mà.";
-                } else if (download > 50) {
-                    text = "Đường truyền ổn định. Tốc độ tốt, phục vụ trơn tru cho công việc văn phòng, xem phim Full HD và giải trí hàng ngày.";
+                // Xây dựng đoạn kết luận thông minh dựa trên thông số thực tế so với tiêu chuẩn
+                let evaluation = "";
+                if (download >= 100 && ping < 15) {
+                    evaluation = "🔥 <span style='color: #4ade80; font-weight: bold;'>Mạng của bạn hoàn toàn ổn định và vượt tiêu chuẩn cao!</span> Tốc độ download siêu tốc cùng độ trễ cực thấp, đáp ứng hoàn hảo mọi tác vụ nặng như chơi game quốc tế, livestream 4K và truyền tải dữ liệu lớn.";
+                } else if (download >= 30) {
+                    evaluation = "👍 <span style='color: #38bdf8; font-weight: bold;'>Mạng của bạn đạt mức tốt và ổn định.</span> Phục vụ trơn tru nhu cầu làm việc, học tập trực tuyến và giải trí phim ảnh Full HD hàng ngày.";
                 } else {
-                    text = "Đường truyền ở mức cơ bản. Phù hợp lướt web, đọc báo và xem video chất lượng vừa phải.";
+                    evaluation = "⚠️ <span style='color: #f87171; font-weight: bold;'>Mạng của bạn đang bị yếu hoặc kém hơn tiêu chuẩn.</span> Có thể gặp hiện tượng giật lag khi xem video nặng hoặc chơi game do băng thông hạn chế.";
                 }
-                
-                document.getElementById('conclusionText').innerText = text;
-                conclusionBox.style.display = 'block';
+
+                document.getElementById('conclusionText').innerHTML = evaluation;
+                conclusionCard.style.display = 'block';
                 retryBtn.style.display = 'block';
             }, 2500);
         }
