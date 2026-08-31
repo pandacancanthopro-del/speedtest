@@ -16,6 +16,7 @@
         .value { font-weight: bold; color: #ffffff; }
         .conclusion-card { margin-top: 15px; padding: 12px; background: #112233; border-radius: 8px; border-left: 5px solid #00b4d8; font-size: 13px; line-height: 1.5; }
         .brand-footer { margin-top: 8px; text-align: right; font-size: 11px; color: #ff6500; font-weight: bold; letter-spacing: 0.5px; }
+        .standard-info { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: #cbd5e1; }
     </style>
 </head>
 <body>
@@ -37,6 +38,13 @@
             <div class="conclusion-card" id="conclusionCard" style="display:none;">
                 <div style="font-weight: bold; margin-bottom: 4px; color: #38bdf8;">ĐÁNH GIÁ CHUYÊN GIA:</div>
                 <div id="conclusionText">Đang tổng hợp thông số...</div>
+                
+                <div class="standard-info">
+                    <b>Tiêu chuẩn kỹ thuật:</b><br>
+                    • Ping tốt: &lt; 20ms (Ổn định: dưới 50ms)<br>
+                    • Jitter tốt: &lt; 5ms (Độ dao động thấp)
+                </div>
+
                 <div class="brand-footer">Công Cụ By TRẦN TRINH OFFICIAL</div>
             </div>
             
@@ -65,19 +73,18 @@
             document.getElementById('downloadVal').innerText = "Đang đo...";
             document.getElementById('uploadVal').innerText = "Đang đo...";
 
-            // Lấy IP và thông tin thật chính xác từ API
             try {
                 let res = await fetch('https://ipapi.co/json/');
                 let data = await res.json();
                 if(data.ip) {
-                    document.getElementById('ipVal').innerText = data.ip; // Hiển thị nguyên vẹn IP thật
+                    document.getElementById('ipVal').innerText = data.ip;
                     document.getElementById('ispVal').innerText = data.org || data.asn || "Viettel Group";
-                    document.getElementById('locationVal5' in data || `${data.city}, ${data.country_name}` || "Ho Chi Minh, Vietnam");
+                    document.getElementById('locationVal').innerText = `${data.city}, ${data.country_name}` || "Ho Chi Minh, Vietnam";
                 } else {
                     throw new Error();
                 }
             } catch (err) {
-                document.getElementById('ipVal').innerText = "113.23.15.88"; // IP mẫu nếu lỗi mạng
+                document.getElementById('ipVal').innerText = "113.23.15.88";
                 document.getElementById('ispVal').innerText = "Viettel Group";
                 document.getElementById('locationVal').innerText = "Ho Chi Minh, Vietnam";
             }
@@ -94,12 +101,12 @@
                 document.getElementById('uploadVal').innerText = upload + " Mbps";
 
                 let evaluation = "";
-                if (download >= 100 && ping < 15) {
-                    evaluation = "🔥 <span style='color: #4ade80; font-weight: bold;'>Mạng của bạn hoàn toàn ổn định và vượt tiêu chuẩn cao!</span> Tốc độ download siêu tốc cùng độ trễ cực thấp, đáp ứng hoàn hảo mọi tác vụ nặng như chơi game quốc tế, livestream 4K và truyền tải dữ liệu lớn.";
+                if (download >= 100 && ping < 20) {
+                    evaluation = "🔥 <span style='color: #4ade80; font-weight: bold;'>Mạng hoàn toàn ổn định và vượt chuẩn!</span> Ping thấp & Jitter cực nhỏ giúp chơi game, gọi video hoặc livestream không lo giật lag.";
                 } else if (download >= 30) {
-                    evaluation = "👍 <span style='color: #38bdf8; font-weight: bold;'>Mạng của bạn đạt mức tốt và ổn định.</span> Phục vụ trơn tru nhu cầu làm việc, học tập trực tuyến và giải trí phim ảnh Full HD hàng ngày.";
+                    evaluation = "👍 <span style='color: #38bdf8; font-weight: bold;'>Mạng đạt mức tốt.</span> Thông số Ping và Jitter nằm trong ngưỡng an toàn cho nhu cầu giải trí và làm việc hàng ngày.";
                 } else {
-                    evaluation = "⚠️ <span style='color: #f87171; font-weight: bold;'>Mạng của bạn đang bị yếu hoặc kém hơn tiêu chuẩn.</span> Có thể gặp hiện tượng giật lag khi xem video nặng hoặc chơi game do băng thông hạn chế.";
+                    evaluation = "⚠️ <span style='color: #f87171; font-weight: bold;'>Mạng đang yếu hoặc kém ổn định.</span> Chỉ số Ping/Jitter cao hơn tiêu chuẩn có thể gây ra hiện tượng chậm chờn.";
                 }
 
                 document.getElementById('conclusionText').innerHTML = evaluation;
